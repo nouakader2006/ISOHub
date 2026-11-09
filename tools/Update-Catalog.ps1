@@ -17,7 +17,7 @@ function Get-Ubuntu {
         {
             $Version = $Matches[1]
         }
-
+        Write-Host "Ubuntu : $Version"
         return @{
             Name         = "Ubuntu"
             Version      = "$Version LTS"
@@ -47,7 +47,7 @@ function Get-Kali {
         if ($page.Content -match 'kali-linux-([\d\.]+)-installer-amd64\.iso')
         {
             $Version = $Matches[1]
-
+            Write-Host "Kali : $Version"
             return @{
                 Name         = "Kali"
                 Version      = $Version
@@ -77,7 +77,7 @@ function Get-Debian {
         if ($page.Content -match 'debian-([\d\.]+)-amd64-netinst\.iso')
         {
             $Version = $Matches[1]
-
+            Write-Host "Debian : $Version"
             return @{
                 Name         = "Debian"
                 Version      = $Version
@@ -110,7 +110,7 @@ function Get-Windows11 {
         {
             $Version = $Matches[1]
         }
-
+        Write-Host "Windows 11 : $Version"
         return @{
             Name         = "Windows 11"
             Version      = $Version
@@ -129,7 +129,7 @@ function Get-Windows11 {
 }
 
 function Get-Windows10 {
-
+    Write-Host "Windows 10 : $Version"
     return @{
         Name         = "Windows 10"
         Version      = "22H2"
@@ -144,7 +144,7 @@ function Get-Windows10 {
 }
 
 function Get-Rufus {
-
+    Write-Host "Refus : $Version"
     return @{
         Name         = "Rufus"
         Version      = "Latest"

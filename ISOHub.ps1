@@ -144,7 +144,7 @@ MIT License
 # =======================================
 
 $OSList = Get-Content ".\data\os.json" -Raw | ConvertFrom-Json
-Remove-Item "C:\ISOHub\History\downloads.csv"
+
 
 
 # =======================================
@@ -215,6 +215,14 @@ $btnUpdateCatalog = New-Object System.Windows.Forms.Button
 $btnUpdateCatalog.Text = "Update Catalog"
 $btnUpdateCatalog.Location = New-Object System.Drawing.Point(720,230)
 $btnUpdateCatalog.Size = New-Object System.Drawing.Size(200,50)
+
+# =======================================
+# test Link
+# =======================================
+$btnTestLinks = New-Object System.Windows.Forms.Button
+$btnTestLinks.Text = "Test Links"
+$btnTestLinks.Location = New-Object System.Drawing.Point(720,300)
+$btnTestLinks.Size = New-Object System.Drawing.Size(200,50)
 
 # =======================================
 # label Ready
@@ -476,43 +484,171 @@ $btnDownload.Add_Click({
 # =======================================
 # Open Folder
 # =======================================
-$btnFolder.Add_Click({
+function Show-LinkTestWindow {
 
-    try
+    $TestForm = New-Object System.Windows.Forms.Form
+    $TestForm.Text = "ISOHub - Link Tester"
+    $TestForm.Size = New-Object System.Drawing.Size(700,500)
+    $TestForm.StartPosition = "CenterParent"
+
+    $txtResults = New-Object System.Windows.Forms.TextBox
+    $txtResults.Multiline = $true
+    $txtResults.ReadOnly = $true
+    $txtResults.ScrollBars = "Vertical"
+    $txtResults.Dock = "Fill"
+
+    $TestForm.Controls.Add($txtResults)
+
+    $OSList = Get-Content ".\data\os.json" -Raw |
+        ConvertFrom-Json
+
+    foreach($OS in $OSList)
     {
-        if (Test-Path $DownloadFolder)
+        $txtResults.AppendText(
+            "Testing $($OS.Name)...`r`n"
+        )
+
+        try
         {
-            Start-Process explorer.exe `
-                -ArgumentList "`"$DownloadFolder`""
+            $Request = [System.Net.WebRequest]::Create(
+                $OS.Url
+            )
+
+            $Request.Timeout = 10000
+
+            $Response = $Request.GetResponse()
+
+            $txtResults.AppendText(
+                "OK`r`n`r`n"
+            )
+
+            $Response.Close()
         }
-        else
+        catch
         {
-            [System.Windows.Forms.MessageBox]::Show(
-                "Download folder not found:`n$DownloadFolder",
-                "ISOHub"
+            $txtResults.AppendText(
+                "FAILED : $($_.Exception.Message)`r`n`r`n"
             )
         }
-    }
-    catch
-    {
-        [System.Windows.Forms.MessageBox]::Show(
-            $_.Exception.Message,
-            "ISOHub Error"
-        )
+
+        [System.Windows.Forms.Application]::DoEvents()
     }
 
+    $txtResults.AppendText(
+        "=========`r`nTest completed."
+    )
+
+    $TestForm.ShowDialog()
+}
+$btnFolder.Add_Click({
+
+    Show-LinkTestWindow
 })
 # =======================================
 # Update Catalog
 # =======================================
 $btnUpdateCatalog.Add_Click({
 
-    & ".\tools\Update-Catalog.ps1"
+    try
+    {
+        $UpdateScript = Join-Path `
+            $PSScriptRoot `
+            "tools\Update-Catalog.ps1"
 
-    $status.Text = "Catalog updated."
+        if (!(Test-Path $UpdateScript))
+        {
+            throw "Update-Catalog.ps1 not found:`n$UpdateScript"
+        }
+
+        & $UpdateScript
+
+        $status.Text = "Catalog updated successfully."
+
+        $script:OSList = Get-Content ".\data\os.json" -Raw |
+         ConvertFrom-Json
+
+        $listBox.Items.Clear()
+
+        foreach($OS in $script:OSList)
+        {
+            [void]$listBox.Items.Add("$($OS.Name) - $($OS.Version)"
+)
+        }
+    }
+    catch
+    {
+        [System.Windows.Forms.MessageBox]::Show(
+            $_.Exception.Message,
+            "ISOHub Error",
+            [System.Windows.Forms.MessageBoxButtons]::OK,
+            [System.Windows.Forms.MessageBoxIcon]::Error
+        )
+    }
 
 })
+# =======================================
+# Test Link
+# =======================================
+function Show-LinkTestWindow {
 
+    $TestForm = New-Object System.Windows.Forms.Form
+    $TestForm.Text = "ISOHub - Link Tester"
+    $TestForm.Size = New-Object System.Drawing.Size(700,500)
+    $TestForm.StartPosition = "CenterParent"
+
+    $txtResults = New-Object System.Windows.Forms.TextBox
+    $txtResults.Multiline = $true
+    $txtResults.ReadOnly = $true
+    $txtResults.ScrollBars = "Vertical"
+    $txtResults.Dock = "Fill"
+
+    $TestForm.Controls.Add($txtResults)
+
+    $OSList = Get-Content ".\data\os.json" -Raw |
+        ConvertFrom-Json
+
+    foreach($OS in $OSList)
+    {
+        $txtResults.AppendText(
+            "Testing $($OS.Name)...`r`n"
+        )
+
+        try
+        {
+            $Request = [System.Net.WebRequest]::Create(
+                $OS.Url
+            )
+
+            $Request.Timeout = 10000
+
+            $Response = $Request.GetResponse()
+
+            $txtResults.AppendText(
+                "OK`r`n`r`n"
+            )
+
+            $Response.Close()
+        }
+        catch
+        {
+            $txtResults.AppendText(
+                "FAILED : $($_.Exception.Message)`r`n`r`n"
+            )
+        }
+
+        [System.Windows.Forms.Application]::DoEvents()
+    }
+
+    $txtResults.AppendText(
+        "=========`r`nTest completed."
+    )
+
+    $TestForm.ShowDialog()
+}
+
+$btnTestLinks.Add_Click({
+Show-LinkTestWindow
+})
 # =======================================
 # Add Controls
 # =======================================
@@ -521,7 +657,9 @@ $form.Controls.Add($listBox)
 $form.Controls.Add($txtInfo)
 $form.Controls.Add($btnDownload)
 $form.Controls.Add($btnFolder)
+$form.Controls.Add($btnUpdateCatalog)
 $form.Controls.Add($btnCancel)
+$form.Controls.Add($btnTestLinks)
 $form.Controls.Add($ProgressBar)
 $form.Controls.Add($status)
 $form.Controls.Add($lblAuthor)
