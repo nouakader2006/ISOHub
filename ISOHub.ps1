@@ -36,27 +36,25 @@ $Global:IsDownloading = $false
 
 function Get-ISOList {
 
-    $JsonUrl = "https://raw.githubusercontent.com/nouakader2006/ISOHub/main/isos.json"
+    $JsonUrl = "https://raw.githubusercontent.com/nouakader2006/ISOHub/main/data/os.json"
 
     try {
 
-        return Invoke-RestMethod $JsonUrl
+        return Invoke-RestMethod -Uri $JsonUrl
 
     }
     catch {
 
         [System.Windows.Forms.MessageBox]::Show(
-            "Unable to retrieve ISO list.",
-            "ISOHub",
-            "OK",
-            "Error"
+            $_.Exception.Message,
+            "ISOHub Error"
         )
 
         return $null
     }
 }
-# Charger la liste des ISO depuis GitHub
 $OSList = Get-ISOList
+$OSList.Count
 # =======================================
 # SHA256
 # =======================================
@@ -78,6 +76,8 @@ function Get-SHA256Hash
 
     return $null
 }
+
+
 
 # =======================================
 # Folders
@@ -144,6 +144,8 @@ MIT License
 # =======================================
 
 $OSList = Get-Content ".\data\os.json" -Raw | ConvertFrom-Json
+Remove-Item "C:\ISOHub\History\downloads.csv"
+
 
 # =======================================
 # Main Window
@@ -162,7 +164,7 @@ $listBox = New-Object System.Windows.Forms.ListBox
 $listBox.Location = New-Object System.Drawing.Point(20,20)
 $listBox.Size = New-Object System.Drawing.Size(300,500)
 
-foreach($OS in $OSList.isos)
+foreach($OS in $OSList)
 {
     $listBox.Items.Add($OS.Name)
 }
@@ -274,6 +276,12 @@ $btnDownload.Add_Click({
     {
         $SelectedOS = $OSList[$listBox.SelectedIndex]
 
+        if ([string]::IsNullOrWhiteSpace($SelectedOS.Url))
+        {
+            $status.Text = "Download URL not found."
+            return
+        }
+    
         if (-not $SelectedOS.Url.StartsWith("https://"))
         {
             $status.Text = "Only HTTPS URLs are allowed."
@@ -301,7 +309,7 @@ $btnDownload.Add_Click({
 
             Remove-Item $Destination -Force
         }
-
+    
         $Global:CurrentDownload = $Destination
         $Global:IsDownloading = $true
 
@@ -324,179 +332,127 @@ $btnDownload.Add_Click({
                     -OutFile $Destination
             }
 
-        $Timer = New-Object System.Windows.Forms.Timer
-        $Timer.Interval = 1000
+        $script:DownloadTimer = New-Object System.Windows.Forms.Timer
+        $script:DownloadTimer.Interval = 1000
 
-        $Timer.Add_Tick({
+        $script:DownloadTimer.Add_Tick({
 
-            if (-not $Global:DownloadJob)
-            {
-                return
-            }
-
-            if ($Global:DownloadJob.State -eq "Completed")
-            {
-                $Timer.Stop()
-
-                $ProgressBar.Style = "Blocks"
-                $ProgressBar.Value = 100
-
-                $ActualHash =
-                Get-SHA256Hash $Global:CurrentDownload
-
-                if (
-                    $SelectedOS.SHA256 -and
-                    $SelectedOS.SHA256 -ne "" -and
-                    $SelectedOS.SHA256 -ne $ActualHash
-                )
-                {
-                    $status.Text =
-                    "WARNING : SHA256 verification failed"
-
-                    [System.Windows.Forms.MessageBox]::Show(
-                        "Hash verification failed.",
-                        "Security Warning"
-                    )
-                }
-                else
-                {
-                    $status.Text =
-                    "Download completed - SHA256 OK"
-                }
-
-                $HistoryFile = Join-Path `
-                    $HistoryFolder `
-                    "downloads.csv"
-
-                [PSCustomObject]@{
-    Date       = Get-Date
-    Name       = $SelectedOS.Name
-    Version    = $SelectedOS.Version
-    File       = $SelectedOS.FileName
-    SHA256     = $ActualHash
-    Verified   = ($ActualHash -eq $SelectedOS.SHA256.ToUpper())
-} |
-                Export-Csv `
-                    -Path $HistoryFile `
-                    -Append `
-                    -NoTypeInformation
-
-                Remove-Job `
-                    $Global:DownloadJob `
-                    -Force `
-                    -ErrorAction SilentlyContinue
-
-                $Global:DownloadJob = $null
-                $Global:IsDownloading = $false
-
-                $btnDownload.Enabled = $true
-                $btnCancel.Enabled = $false
-            }
-
-            elseif ($Global:DownloadJob.State -eq "Failed")
-            {
-                $Timer.Stop()
-
-                $ProgressBar.Style = "Blocks"
-                $ProgressBar.Value = 0
-
-                $status.Text = "Download failed."
-
-                Remove-Job `
-                    $Global:DownloadJob `
-                    -Force `
-                    -ErrorAction SilentlyContinue
-
-                $Global:DownloadJob = $null
-                $Global:IsDownloading = $false
-
-                $btnDownload.Enabled = $true
-                $btnCancel.Enabled = $false
-            }
-
-            elseif ($Global:DownloadJob.State -eq "Stopped")
-            {
-                $Timer.Stop()
-
-                $ProgressBar.Style = "Blocks"
-                $ProgressBar.Value = 0
-
-                $status.Text = "Download cancelled."
-
-                $Global:DownloadJob = $null
-                $Global:IsDownloading = $false
-
-                $btnDownload.Enabled = $true
-                $btnCancel.Enabled = $false
-            }
-        })
-
-        $Timer.Start()
-    }
-    catch
+    if (-not $Global:DownloadJob)
     {
-        $status.Text = $_.Exception.Message
+        return
+    }
 
+    if ($Global:DownloadJob.State -eq "Completed")
+    {
+        $script:DownloadTimer.Stop()
+
+        $ProgressBar.Style = "Blocks"
+        $ProgressBar.Value = 100
+
+        $ActualHash = Get-SHA256Hash $Global:CurrentDownload
+
+        $Verified = $false
+
+        if (
+            $SelectedOS.SHA256 -and
+            $SelectedOS.SHA256.Trim() -ne ""
+        )
+        {
+            $Verified = (
+                $ActualHash -eq $SelectedOS.SHA256.ToUpper()
+            )
+        }
+
+        if (
+            $SelectedOS.SHA256 -and
+            $SelectedOS.SHA256.Trim() -ne "" -and
+            $SelectedOS.SHA256.ToUpper() -ne $ActualHash
+        )
+        {
+            $status.Text =
+            "WARNING : SHA256 verification failed"
+
+            [System.Windows.Forms.MessageBox]::Show(
+                "Hash verification failed.",
+                "Security Warning"
+            )
+        }
+        else
+        {
+            $status.Text =
+            "Download completed."
+        }
+
+        $HistoryFile = Join-Path `
+            $HistoryFolder `
+            "downloads.csv"
+
+        [PSCustomObject]@{
+            Date       = Get-Date
+            Name       = $SelectedOS.Name
+            Version    = $SelectedOS.Version
+            File       = $SelectedOS.FileName
+            SHA256     = $ActualHash
+            Verified   = $Verified
+        } |
+        Export-Csv `
+            -Path $HistoryFile `
+            -Append `
+            -NoTypeInformation `
+            -Force
+
+        Remove-Job `
+            $Global:DownloadJob `
+            -Force `
+            -ErrorAction SilentlyContinue
+
+        $Global:DownloadJob = $null
         $Global:IsDownloading = $false
 
         $btnDownload.Enabled = $true
         $btnCancel.Enabled = $false
     }
-})
-# =======================================
-# Cancel
-# =======================================
 
-$btnCancel.Add_Click({
-
-    try
+    elseif ($Global:DownloadJob.State -eq "Failed")
     {
-        if ($Global:DownloadJob)
-        {
-            Stop-Job `
-                $Global:DownloadJob `
-                -ErrorAction SilentlyContinue
+        $Script:DownloadTimer.Stop()
 
-            Start-Sleep -Seconds 1
+        $ProgressBar.Style = "Blocks"
+        $ProgressBar.Value = 0
 
-            if (
-                $Global:CurrentDownload -and
-                (Test-Path $Global:CurrentDownload)
-            )
-            {
-                Remove-Item `
-                    $Global:CurrentDownload `
-                    -Force `
-                    -ErrorAction SilentlyContinue
-            }
+        $status.Text = "Download failed."
 
-            $status.Text = "Download cancelled."
-        }
+        Remove-Job `
+            $Global:DownloadJob `
+            -Force `
+            -ErrorAction SilentlyContinue
+
+        $Global:DownloadJob = $null
+        $Global:IsDownloading = $false
+
+        $btnDownload.Enabled = $true
+        $btnCancel.Enabled = $false
     }
-    catch
+
+    elseif ($Global:DownloadJob.State -eq "Stopped")
     {
-        $status.Text =
-        "Unable to cancel download."
-    }
-})
-$btnFolder.Add_Click({
+        $Script:DownloadTimer.Stop()
 
-    try
-    {
-        if (Test-Path $DownloadFolder)
-        {
-            explorer.exe $DownloadFolder
-        }
-        else
-        {
-            [System.Windows.Forms.MessageBox]::Show(
-                "Download folder not found:`n$DownloadFolder",
-                "ISOHub",
-                [System.Windows.Forms.MessageBoxButtons]::OK,
-                [System.Windows.Forms.MessageBoxIcon]::Warning
-            )
-        }
+        $ProgressBar.Style = "Blocks"
+        $ProgressBar.Value = 0
+
+        $status.Text = "Download cancelled."
+
+        $Global:DownloadJob = $null
+        $Global:IsDownloading = $false
+
+        $btnDownload.Enabled = $true
+        $btnCancel.Enabled = $false
     }
+     })
+
+        $Script:DownloadTimer.Start()
+    }   
     catch
     {
         [System.Windows.Forms.MessageBox]::Show(
@@ -506,6 +462,34 @@ $btnFolder.Add_Click({
             [System.Windows.Forms.MessageBoxIcon]::Error
         )
     }
+}
+    )
+
+$btnFolder.Add_Click({
+
+    try
+    {
+        if (Test-Path $DownloadFolder)
+        {
+            Start-Process explorer.exe `
+                -ArgumentList "`"$DownloadFolder`""
+        }
+        else
+        {
+            [System.Windows.Forms.MessageBox]::Show(
+                "Download folder not found:`n$DownloadFolder",
+                "ISOHub"
+            )
+        }
+    }
+    catch
+    {
+        [System.Windows.Forms.MessageBox]::Show(
+            $_.Exception.Message,
+            "ISOHub Error"
+        )
+    }
+
 })
 # =======================================
 # Add Controls
