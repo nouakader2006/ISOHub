@@ -207,6 +207,15 @@ $btnFolder = New-Object System.Windows.Forms.Button
 $btnFolder.Text = "Open Downloads"
 $btnFolder.Location = New-Object System.Drawing.Point(720,90)
 $btnFolder.Size = New-Object System.Drawing.Size(200,50)
+
+# =======================================
+# Update Catalog
+# =======================================
+$btnUpdateCatalog = New-Object System.Windows.Forms.Button
+$btnUpdateCatalog.Text = "Update Catalog"
+$btnUpdateCatalog.Location = New-Object System.Drawing.Point(720,230)
+$btnUpdateCatalog.Size = New-Object System.Drawing.Size(200,50)
+
 # =======================================
 # label Ready
 # =======================================
@@ -464,7 +473,9 @@ $btnDownload.Add_Click({
     }
 }
     )
-
+# =======================================
+# Open Folder
+# =======================================
 $btnFolder.Add_Click({
 
     try
@@ -491,6 +502,17 @@ $btnFolder.Add_Click({
     }
 
 })
+# =======================================
+# Update Catalog
+# =======================================
+$btnUpdateCatalog.Add_Click({
+
+    & ".\tools\Update-Catalog.ps1"
+
+    $status.Text = "Catalog updated."
+
+})
+
 # =======================================
 # Add Controls
 # =======================================
