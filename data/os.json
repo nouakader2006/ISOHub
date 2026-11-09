@@ -32,5 +32,15 @@
     "Size": "~4 GB",
     "Url": "https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-13.7.0-amd64-netinst.iso",
     "SHA256": "ef04d0276850d70e4aaec0b55003628660e9631b26e35215a70ab3c8c707294a4b12731bc73c75a932902f703a7c278310ca99df28d6b36fb06d5618d8d0f678"
-  }
-]
+  },
+  {
+      "name": "Windows 11",
+      "version": "24H2",
+      "downloadPage": "https://www.microsoft.com/software-download/windows11"
+    },
+    {
+      "name": "Windows 10",
+      "version": "22H2",
+      "downloadPage": "https://www.microsoft.com/software-download/windows10"
+    }
+  ]

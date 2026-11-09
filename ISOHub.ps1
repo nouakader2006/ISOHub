@@ -31,6 +31,33 @@ $Global:DownloadJob = $null
 $Global:IsDownloading = $false
 
 # =======================================
+# Get List
+# =======================================
+
+function Get-ISOList {
+
+    $JsonUrl = "https://raw.githubusercontent.com/nouakader2006/ISOHub/main/isos.json"
+
+    try {
+
+        return Invoke-RestMethod $JsonUrl
+
+    }
+    catch {
+
+        [System.Windows.Forms.MessageBox]::Show(
+            "Unable to retrieve ISO list.",
+            "ISOHub",
+            "OK",
+            "Error"
+        )
+
+        return $null
+    }
+}
+# Charger la liste des ISO depuis GitHub
+$OSList = Get-ISOList
+# =======================================
 # SHA256
 # =======================================
 
@@ -135,7 +162,7 @@ $listBox = New-Object System.Windows.Forms.ListBox
 $listBox.Location = New-Object System.Drawing.Point(20,20)
 $listBox.Size = New-Object System.Drawing.Size(300,500)
 
-foreach($OS in $OSList)
+foreach($OS in $OSList.isos)
 {
     $listBox.Items.Add($OS.Name)
 }
