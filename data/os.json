@@ -34,13 +34,15 @@
     "SHA256": "ef04d0276850d70e4aaec0b55003628660e9631b26e35215a70ab3c8c707294a4b12731bc73c75a932902f703a7c278310ca99df28d6b36fb06d5618d8d0f678"
   },
   {
-      "name": "Windows 11",
-      "version": "24H2",
-      "downloadPage": "https://www.microsoft.com/software-download/windows11"
-    },
-    {
-      "name": "Windows 10",
-      "version": "22H2",
-      "downloadPage": "https://www.microsoft.com/software-download/windows10"
-    }
+    "Name": "Windows 11",
+    "Version": "24H2",
+    "Type": "Windows",
+    "DownloadPage": "https://www.microsoft.com/software-download/windows11"
+},
+{
+    "Name": "Windows 10",
+    "Version": "22H2",
+    "Type": "Windows",
+    "DownloadPage": "https://www.microsoft.com/software-download/windows10"
+}
   ]
