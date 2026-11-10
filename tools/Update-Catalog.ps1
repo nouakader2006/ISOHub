@@ -4,37 +4,54 @@
 
 $CatalogPath = ".\data\os.json"
 
-function Get-Ubuntu {
+function Get-UbuntuLatest {
     try {
+        $page = Invoke-WebRequest "https://releases.ubuntu.com/"
 
-        $Version = "Unknown"
+        $IsoUrl = ($page.Links |
+            Where-Object {
+                $_.href -match 'ubuntu-\d+\.\d+(\.\d+)?-desktop-amd64\.iso'
+            } |
+            Select-Object -First 1).href
 
-        $page = Invoke-WebRequest `
-            -Uri "https://releases.ubuntu.com/" `
-            -UseBasicParsing
+        if (-not $IsoUrl) {
+            throw "Ubuntu ISO link not found"
+        }
 
-        if ($page.Content -match 'ubuntu-([\d\.]+)-desktop-amd64\.iso')
-        {
+        if ($IsoUrl -notmatch '^https?://') {
+            $IsoUrl = "https://releases.ubuntu.com/$IsoUrl"
+        }
+
+        $FileName = Split-Path $IsoUrl -Leaf
+
+        if ($FileName -match 'ubuntu-(\d+\.\d+(?:\.\d+)?)') {
             $Version = $Matches[1]
         }
+        else {
+            throw "Unable to extract Ubuntu version"
+        }
+
         Write-Host "Ubuntu : $Version"
+        Write-Host "ISO URL : $IsoUrl"
+
         return @{
             Name         = "Ubuntu"
             Version      = "$Version LTS"
             Type         = "Linux"
             Architecture = "amd64"
-            FileName     = "ubuntu-$Version-desktop-amd64.iso"
+            FileName     = $FileName
             Vendor       = "Canonical"
             Size         = "~6 GB"
-            Url          = "https://releases.ubuntu.com/$Version/ubuntu-$Version-desktop-amd64.iso"
+            Url          = $IsoUrl
             SHA256       = ""
+            Category     = "Linux"
         }
-
     }
     catch {
-        Write-Warning "Ubuntu update failed"
+        Write-Warning "Ubuntu update failed: $_"
     }
 }
+
 
 function Get-Kali {
 
