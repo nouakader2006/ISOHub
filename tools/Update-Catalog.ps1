@@ -1,227 +1,219 @@
-# =====================================
-# ISOHub - Update Catalog
-# =====================================
+# Load current catalog
+# Backup catalog
+# Get latest Linux versions
+# Compare with existing entries
+# Build catalog
+# Save catalog
+# =======================================
+# Paths
+# =======================================
 
-$CatalogPath = ".\data\os.json"
+$DataFolder  = ".\data"
+$CatalogFile = Join-Path $DataFolder "os.json"
+$BackupFile  = Join-Path $DataFolder "os_backup.json"
 
+# =======================================
+# Load catalog
+# =======================================
+
+$CurrentCatalog = Get-Content $CatalogFile -Raw | ConvertFrom-Json
+
+Copy-Item $CatalogFile $BackupFile -Force
+
+Write-Host "Catalog backup created"
+function Get-CatalogEntry {
+    param(
+        [string]$Name
+    )
+
+    return $CurrentCatalog |
+        Where-Object Name -eq $Name |
+        Select-Object -First 1
+}
+
+#==================================
+#Ubuntu
+#==================================
 function Get-UbuntuLatest {
+
+    $Current = Get-CatalogEntry "Ubuntu"
+
     try {
-        $page = Invoke-WebRequest "https://releases.ubuntu.com/"
+        Write-Host "Checking Ubuntu..."
 
-        $IsoUrl = ($page.Links |
-            Where-Object {
-                $_.href -match 'ubuntu-\d+\.\d+(\.\d+)?-desktop-amd64\.iso'
-            } |
-            Select-Object -First 1).href
+        $Page = Invoke-WebRequest `
+            -Uri "https://ubuntu.com/download/desktop"
 
-        if (-not $IsoUrl) {
-            throw "Ubuntu ISO link not found"
+        $Match = [regex]::Match(
+            $Page.Content,
+            'Ubuntu\s+(\d+\.\d+(?:\.\d+)?)\s+LTS'
+        )
+
+        if (-not $Match.Success) {
+            Write-Warning "Unable to detect Ubuntu version"
+            return $Current
         }
 
-        if ($IsoUrl -notmatch '^https?://') {
-            $IsoUrl = "https://releases.ubuntu.com/$IsoUrl"
+        $Version = $Match.Groups[1].Value
+
+        $FileName = "ubuntu-$Version-desktop-amd64.iso"
+
+        $IsoUrl = "https://releases.ubuntu.com/$Version/$FileName"
+
+        if ($Current.Version -like "$Version*") {
+
+            Write-Host "[OK] Ubuntu already up to date ($Version)"
+
+            return $Current
         }
 
-        $FileName = Split-Path $IsoUrl -Leaf
-
-        if ($FileName -match 'ubuntu-(\d+\.\d+(?:\.\d+)?)') {
-            $Version = $Matches[1]
-        }
-        else {
-            throw "Unable to extract Ubuntu version"
-        }
-
-        Write-Host "Ubuntu : $Version"
-        Write-Host "ISO URL : $IsoUrl"
+        Write-Host "[UPDATE] Ubuntu $($Current.version) -> $Version LTS"
 
         return @{
             Name         = "Ubuntu"
             Version      = "$Version LTS"
-            Type         = "Linux"
             Architecture = "amd64"
             FileName     = $FileName
             Vendor       = "Canonical"
+            Type         = "Linux"
+            Category     = "Linux"
             Size         = "~6 GB"
             Url          = $IsoUrl
             SHA256       = ""
-            Category     = "Linux"
         }
     }
     catch {
+
         Write-Warning "Ubuntu update failed: $_"
+
+        return $Current
     }
 }
 
+#==================================
+#Kali
+#==================================
+function Get-KaliLatest {
 
-function Get-Kali {
-
-    try {
-
-        $page = Invoke-WebRequest `
-            -Uri "https://cdimage.kali.org/current/" `
-            -UseBasicParsing
-
-        if ($page.Content -match 'kali-linux-([\d\.]+)-installer-amd64\.iso')
-        {
-            $Version = $Matches[1]
-            Write-Host "Kali : $Version"
-            return @{
-                Name         = "Kali"
-                Version      = $Version
-                Type         = "Linux"
-                Architecture = "x64"
-                FileName     = "kali-linux-$Version-installer-amd64.iso"
-                Vendor       = "Offensive Security"
-                Size         = "~4.5 GB"
-                Url          = "https://cdimage.kali.org/current/kali-linux-$Version-installer-amd64.iso"
-                SHA256       = ""
-            }
-        }
-    }
-    catch {
-        Write-Warning "Kali update failed"
-    }
-}
-
-function Get-Debian {
+    $Current = Get-CatalogEntry "Kali"
 
     try {
 
-        $page = Invoke-WebRequest `
-            -Uri "https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/" `
-            -UseBasicParsing
+        $Page = Invoke-WebRequest `
+            "https://cdimage.kali.org/current/"
 
-        if ($page.Content -match 'debian-([\d\.]+)-amd64-netinst\.iso')
-        {
-            $Version = $Matches[1]
-            Write-Host "Debian : $Version"
-            return @{
-                Name         = "Debian"
-                Version      = $Version
-                Type         = "Linux"
-                Architecture = "amd64"
-                FileName     = "debian-$Version-amd64-netinst.iso"
-                Vendor       = "Debian Project"
-                Size         = "~650 MB"
-                Url          = "https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-$Version-amd64-netinst.iso"
-                SHA256       = ""
-            }
+        $Match = [regex]::Match(
+            $Page.Content,
+            'kali-linux-(\d+\.\d+)-installer-amd64\.iso'
+        )
+
+        if (-not $Match.Success) {
+            return $Current
         }
-    }
-    catch {
-        Write-Warning "Debian update failed"
-    }
-}
 
-function Get-Windows11 {
+        $Version = $Match.Groups[1].Value
 
-    try {
-
-        $Version = "Latest"
-
-        $page = Invoke-WebRequest `
-            -Uri "https://learn.microsoft.com/en-us/windows/release-health/windows11-release-information" `
-            -UseBasicParsing
-
-        if ($page.Content -match 'Version ([0-9]{2}H[0-9])')
-        {
-            $Version = $Matches[1]
+        if ($Current.Version -eq $Version) {
+            return $Current
         }
-        Write-Host "Windows 11 : $Version"
+
         return @{
-            Name         = "Windows 11"
+            Name         = "Kali"
             Version      = $Version
-            Type         = "Windows"
             Architecture = "x64"
-            FileName     = "MediaCreationTool_W11.exe"
-            Vendor       = "Microsoft"
-            Size         = "20 MB"
-            Url          = "https://go.microsoft.com/fwlink/?linkid=2156295"
+            FileName     = "kali-linux-$Version-installer-amd64.iso"
+            Vendor       = "Offensive Security"
+            Type         = "Linux"
+            Category     = "Linux"
+            Size         = "~4.5 GB"
+            Url          = "https://cdimage.kali.org/current/kali-linux-$Version-installer-amd64.iso"
             SHA256       = ""
         }
     }
     catch {
-        Write-Warning "Windows 11 update failed"
+        return $Current
     }
 }
 
-function Get-Windows10 {
-    Write-Host "Windows 10 : $Version"
-    return @{
-        Name         = "Windows 10"
-        Version      = "22H2"
-        Type         = "Windows"
-        Architecture = "x64"
-        FileName     = "MediaCreationTool_W10.exe"
-        Vendor       = "Microsoft"
-        Size         = "20 MB"
-        Url          = "https://go.microsoft.com/fwlink/?LinkId=2265055"
-        SHA256       = ""
+#==================================
+#Debian
+#==================================
+function Get-DebianLatest {
+
+    $Current = Get-CatalogEntry "Debian"
+
+    try {
+
+        $Page = Invoke-WebRequest `
+            "https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/"
+
+        $Match = [regex]::Match(
+            $Page.Content,
+            'debian-(\d+\.\d+\.\d+)-amd64-netinst\.iso'
+        )
+
+        if (-not $Match.Success) {
+            return $Current
+        }
+
+        $Version = $Match.Groups[1].Value
+
+        if ($Current.Version -eq $Version) {
+            return $Current
+        }
+
+        return @{
+            Name         = "Debian"
+            Version      = $Version
+            Architecture = "amd64"
+            FileName     = "debian-$Version-amd64-netinst.iso"
+            Vendor       = "Debian Project"
+            Type         = "Linux"
+            Category     = "Linux"
+            Size         = "~650 MB"
+            Url          = "https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-$Version-amd64-netinst.iso"
+            SHA256       = ""
+        }
+    }
+    catch {
+        return $Current
     }
 }
 
-function Get-Rufus {
-    Write-Host "Refus : $Version"
-    return @{
-        Name         = "Rufus"
-        Version      = "Latest"
-        Type         = "Tool"
-        Architecture = "x64"
-        FileName     = "rufus.exe"
-        Vendor       = "Rufus"
-        Size         = ""
-        Url          = "https://github.com/pbatard/rufus/releases/latest/download/rufus.exe"
-        SHA256       = ""
-    }
-}
+#==================================
+#Windows 
+#==================================
+$Windows11 = Get-CatalogEntry "Windows 11"
+$Windows10 = Get-CatalogEntry "Windows 10"
+#==================================
+#Utility 
+#==================================
+$Rufus  = Get-CatalogEntry "Rufus"
+$Ventoy = Get-CatalogEntry "Ventoy"
+$Etcher = Get-CatalogEntry "Etcher Balena"
 
-function Get-Ventoy {
-
-    return @{
-        Name         = "Ventoy"
-        Version      = "Latest"
-        Type         = "Tool"
-        Architecture = "x64"
-        FileName     = "ventoy.zip"
-        Vendor       = "Ventoy"
-        Size         = ""
-        Url          = "https://github.com/ventoy/Ventoy/releases/latest"
-        SHA256       = ""
-    }
-}
-
-function Get-BalenaEtcher {
-
-    return @{
-        Name         = "Etcher Balena"
-        Version      = "Latest"
-        Type         = "Tool"
-        Architecture = "x64"
-        FileName     = "balenaEtcher.exe"
-        Vendor       = "Balena"
-        Size         = ""
-        Url          = "https://github.com/balena-io/etcher/releases/latest"
-        SHA256       = ""
-    }
-}
-
+#==================================
+#Final Generate 
+#==================================
 $Catalog = @()
 
-$Catalog += Get-Ubuntu
-$Catalog += Get-Kali
-$Catalog += Get-Debian
-$Catalog += Get-Windows11
-$Catalog += Get-Windows10
-$Catalog += Get-Rufus
-$Catalog += Get-Ventoy
-$Catalog += Get-BalenaEtcher
+$Catalog += Get-UbuntuLatest
+$Catalog += Get-KaliLatest
+$Catalog += Get-DebianLatest
 
+$Catalog += $Windows11
+$Catalog += $Windows10
+
+$Catalog += $Rufus
+$Catalog += $Ventoy
+$Catalog += $Etcher
+
+#==================================
+#Save
+#==================================
 $Catalog |
-    ConvertTo-Json -Depth 5 |
-    Set-Content `
-        -Path $CatalogPath `
-        -Encoding UTF8
-
+ConvertTo-Json -Depth 10 |
+Set-Content $CatalogFile -Encoding UTF8
 Write-Host ""
-Write-Host "Catalog updated successfully."
-Write-Host "Entries:" $Catalog.Count
+Write-Host "Catalog updated successfully"
+Write-Host "Entries : $($Catalog.Count)"

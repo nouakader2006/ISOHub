@@ -1,0 +1,85 @@
+[
+  {
+    "Name": "Ubuntu",
+    "Version": "26.04.1 LTS",
+    "Type": "Linux",
+    "Architecture": "amd64",
+    "FileName": "ubuntu-26.04.1-desktop-amd64.iso",
+    "Vendor": "Canonical",
+    "Size": "~6 GB",
+    "Url": "https://releases.ubuntu.com/26.04.1/ubuntu-26.04.1-desktop-amd64.iso",
+    "SHA256": "601e30fbf5d97759367c632e2c33630665039b7e2158fd068403da3ccf1bda1f"
+  },
+  {
+    "Name": "Kali",
+    "Version": "2026.3",
+    "Type": "Linux",
+    "Architecture": "x64",
+    "FileName": "kali-linux-2026.3-installer-amd64.iso",
+    "Size": "4.4 GB",
+    "Url": "https://cdimage.kali.org/kali-2026.3/kali-linux-2026.3-installer-amd64.iso",
+    "SHA256": "db9cbed33edb45727d16911813c2434fcd1419585007884153be22a03b30ec2f"
+  },
+  {
+    "Size": "~650 MB",
+    "SHA256": "",
+    "Name": "Debian",
+    "FileName": "debian-13.7.0-amd64-netinst.iso",
+    "Type": "Linux",
+    "Version": "13.7.0",
+    "Architecture": "amd64",
+    "Category": "Linux",
+    "Url": "https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-13.7.0-amd64-netinst.iso",
+    "Vendor": "Debian Project"
+  },
+  {
+    "Name": "Windows 11",
+    "Version": "24H2",
+    "Type": "Windows",
+    "Architecture": "x64",
+    "FileName": "MediaCreationTool.exe",
+    "Vendor": "Microsoft",
+    "Size": "20Mo",
+    "Url": "https://go.microsoft.com/fwlink/?linkid=2156295",
+    "SHA256": ""
+  },
+  {
+    "Name": "Windows 10",
+    "Version": "22H2",
+    "Type": "Windows",
+    "Architecture": "x64",
+    "FileName": "MediaCreationTool.exe",
+    "Vendor": "Microsoft",
+    "Size": "20Mo",
+    "Url": "https://go.microsoft.com/fwlink/?LinkId=2265055",
+    "SHA256": ""
+  },
+  {
+    "Name": "Rufus",
+    "Version": "Latest",
+    "Type": "Tool",
+    "Architecture": "x64",
+    "FileName": "rufus-4.15.exe",
+    "Vendor": "Refus",
+    "Url": "https://github.com/pbatard/rufus/releases/download/v4.15/rufus-4.15.exe",
+    "SHA256": "082c478e8c432e1ac653899fcf50e3a4077a2851bc6112b5ddd30545962164a9"
+  },
+  {
+    "Name": "Ventoy",
+    "Version": "Latest",
+    "Type": "Tool",
+    "Architecture": "x64",
+    "FileName": "ventoy.zip",
+    "Vendor": "Ventoy",
+    "Url": "https://netactuate.dl.sourceforge.net/project/ventoy/v1.1.18/ventoy-1.1.18-livecd.iso?viasf=1&fid=e16a04a7de9ac025&e=1794333382&st=TTkvaPrXpm7pfCUC1inH4A"
+  },
+  {
+    "Name": "Etcher Balena",
+    "Version": "Latest",
+    "Type": "Tool",
+    "Architecture": "x64",
+    "FileName": "balenaEtcher-2.1.9.Setup.exe",
+    "Vendor": "Ventoy",
+    "Url": "https://github.com/balena-io/etcher/releases/download/v2.1.9/balenaEtcher-2.1.9.Setup.exe"
+  }
+]
