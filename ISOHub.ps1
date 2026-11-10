@@ -20,7 +20,10 @@
 
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
-
+$ScriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
+$DataPath      = Join-Path $ScriptRoot "data"
+$ToolsPath     = Join-Path $ScriptRoot "tools"
+Copy-Item .\ISOHub.ps1 .\ISOHub_Backup.ps1
 # =======================================
 # Global Variables
 # =======================================
@@ -55,6 +58,30 @@ function Get-ISOList {
 }
 $OSList = Get-ISOList
 $OSList.Count
+
+# =======================================
+# Update List
+# =======================================
+function Update-OSList {
+
+    $listBox.Items.Clear()
+
+    if ($cmbCategory.SelectedItem -eq "All")
+    {
+        $script:FilteredOSList = $script:OSList
+    }
+    else
+    {
+        $script:FilteredOSList = $script:OSList |
+            Where-Object Category -eq $cmbCategory.SelectedItem
+    }
+
+    foreach ($OS in $script:FilteredOSList)
+    {
+        [void]$listBox.Items.Add($OS.Name)
+    }
+}
+
 # =======================================
 # SHA256
 # =======================================
@@ -86,6 +113,7 @@ function Get-SHA256Hash
 $RootFolder = "C:\ISOHub"
 $DownloadFolder = "$RootFolder\Downloads"
 $HistoryFolder = "$RootFolder\History"
+
 
 foreach($Folder in @($RootFolder,$DownloadFolder,$HistoryFolder))
 {
@@ -143,7 +171,7 @@ MIT License
 # Load Catalog
 # =======================================
 
-$OSList = Get-Content ".\data\os.json" -Raw | ConvertFrom-Json
+$OSList = Get-Content (Join-Path $ScriptRoot "data\os.json") -Raw | ConvertFrom-Json
 
 
 
@@ -152,28 +180,49 @@ $OSList = Get-Content ".\data\os.json" -Raw | ConvertFrom-Json
 # =======================================
 
 $form = New-Object System.Windows.Forms.Form
+$form.BackColor =[System.Drawing.Color]::LightBlue
 $form.Text = "ISOHub v1.0 - Open Source ISO Downloader"
 $form.Size = New-Object System.Drawing.Size(1000,650)
 $form.StartPosition = "CenterScreen"
 
 # =======================================
+# ComboBox
+# =======================================
+$cmbCategory = New-Object System.Windows.Forms.ComboBox
+$cmbCategory.Location = New-Object System.Drawing.Point(15,25)
+$cmbCategory.Size = New-Object System.Drawing.Size(300,25)
+$cmbCategory.DropDownStyle = "DropDownList"
+$cmbCategory.Items.Add("All")
+$cmbCategory.Items.Add("Linux")
+$cmbCategory.Items.Add("Windows")
+$cmbCategory.Items.Add("Utility")
+$cmbCategory.SelectedIndex = 0
+$form.Controls.Add($cmbCategory)
+$cmbCategory.Add_SelectedIndexChanged({
+
+    Update-OSList
+
+})
+# =======================================
 # ISO List
 # =======================================
-
 $listBox = New-Object System.Windows.Forms.ListBox
-$listBox.Location = New-Object System.Drawing.Point(20,20)
-$listBox.Size = New-Object System.Drawing.Size(300,500)
+$listBox.BackColor =[System.Drawing.Color]::BlanchedAlmond
+$listBox.Location = New-Object System.Drawing.Point(15,55)
+$listBox.Size = New-Object System.Drawing.Size(300,400)
 
 foreach($OS in $OSList)
 {
     $listBox.Items.Add($OS.Name)
 }
 
+
 # =======================================
 # Information Panel
 # =======================================
 
 $txtInfo = New-Object System.Windows.Forms.TextBox
+$txtInfo.BackColor =[System.Drawing.Color]::BlanchedAlmond 
 $txtInfo.Location = New-Object System.Drawing.Point(340,20)
 $txtInfo.Size = New-Object System.Drawing.Size(350,250)
 $txtInfo.Multiline = $true
@@ -223,7 +272,6 @@ $btnTestLinks = New-Object System.Windows.Forms.Button
 $btnTestLinks.Text = "Test Links"
 $btnTestLinks.Location = New-Object System.Drawing.Point(720,300)
 $btnTestLinks.Size = New-Object System.Drawing.Size(200,50)
-
 # =======================================
 # label Ready
 # =======================================
@@ -258,7 +306,7 @@ $listBox.Add_SelectedIndexChanged({
 
     if($listBox.SelectedIndex -ge 0)
     {
-        $SelectedOS = $OSList[$listBox.SelectedIndex]
+        $SelectedOS = $script:FilteredOSList[$listBox.SelectedIndex]
 
         $txtInfo.Text = @"
 Name          : $($SelectedOS.Name)
@@ -291,7 +339,7 @@ $btnDownload.Add_Click({
 
     try
     {
-        $SelectedOS = $OSList[$listBox.SelectedIndex]
+        $SelectedOS = $script:FilteredOSList[$listBox.SelectedIndex]
 
         if ([string]::IsNullOrWhiteSpace($SelectedOS.Url))
         {
@@ -305,7 +353,8 @@ $btnDownload.Add_Click({
             return
         }
 
-        $Destination = Join-Path `
+        
+            $Destination = Join-Path `
             $DownloadFolder `
             $SelectedOS.FileName
 
@@ -484,65 +533,17 @@ $btnDownload.Add_Click({
 # =======================================
 # Open Folder
 # =======================================
-function Show-LinkTestWindow {
-
-    $TestForm = New-Object System.Windows.Forms.Form
-    $TestForm.Text = "ISOHub - Link Tester"
-    $TestForm.Size = New-Object System.Drawing.Size(700,500)
-    $TestForm.StartPosition = "CenterParent"
-
-    $txtResults = New-Object System.Windows.Forms.TextBox
-    $txtResults.Multiline = $true
-    $txtResults.ReadOnly = $true
-    $txtResults.ScrollBars = "Vertical"
-    $txtResults.Dock = "Fill"
-
-    $TestForm.Controls.Add($txtResults)
-
-    $OSList = Get-Content ".\data\os.json" -Raw |
-        ConvertFrom-Json
-
-    foreach($OS in $OSList)
-    {
-        $txtResults.AppendText(
-            "Testing $($OS.Name)...`r`n"
-        )
-
-        try
-        {
-            $Request = [System.Net.WebRequest]::Create(
-                $OS.Url
-            )
-
-            $Request.Timeout = 10000
-
-            $Response = $Request.GetResponse()
-
-            $txtResults.AppendText(
-                "OK`r`n`r`n"
-            )
-
-            $Response.Close()
-        }
-        catch
-        {
-            $txtResults.AppendText(
-                "FAILED : $($_.Exception.Message)`r`n`r`n"
-            )
-        }
-
-        [System.Windows.Forms.Application]::DoEvents()
-    }
-
-    $txtResults.AppendText(
-        "=========`r`nTest completed."
-    )
-
-    $TestForm.ShowDialog()
-}
 $btnFolder.Add_Click({
 
-    Show-LinkTestWindow
+    if (!(Test-Path $DownloadFolder))
+    {
+        New-Item `
+            -ItemType Directory `
+            -Path $DownloadFolder | Out-Null
+    }
+
+    Invoke-Item $DownloadFolder
+
 })
 # =======================================
 # Update Catalog
@@ -559,9 +560,7 @@ $btnUpdateCatalog.Add_Click({
     $EtcherBalena = $Script:OSList | Where-Object Name -eq "Etcher Balena"
     try
     {
-        $UpdateScript = Join-Path `
-            $PSScriptRoot `
-            "tools\Update-Catalog.ps1"
+       $UpdateScript = Join-Path $ToolsPath "Update-Catalog.ps1"
 
         if (!(Test-Path $UpdateScript))
         {
@@ -572,18 +571,14 @@ $btnUpdateCatalog.Add_Click({
 
         $status.Text = "Catalog updated successfully."
 
-        $script:OSList = Get-Content ".\data\os.json" -Raw |
+        $script:OSList = Get-Content (Join-Path $DataPath "os.json") -Raw |
          ConvertFrom-Json
 
         $listBox.Items.Clear()
 
-        
+           Update-OSList
 
-        foreach($OS in $script:OSList)
-        {
-            [void]$listBox.Items.Add("$($OS.Name) - $($OS.Version)"
-)
-        }
+        
     }
     catch
     {
@@ -661,8 +656,7 @@ function Show-LinkTestWindow {
 
     $TestForm.Controls.Add($txtResults)
 
-    $OSList = Get-Content ".\data\os.json" -Raw |
-        ConvertFrom-Json
+    $OSList = Get-Content (Join-Path $DataPath "os.json") -Raw |ConvertFrom-Json
 
     foreach($OS in $OSList)
     {

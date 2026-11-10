@@ -75,9 +75,9 @@
     "Type": "Tool",
     "Category": "Utility",
     "Architecture": "x64",
-    "FileName": "ventoy.zip",
+    "FileName": "ventoy-1.1.18-livecd.iso",
     "Vendor": "Ventoy",
-    "Url": "https://netactuate.dl.sourceforge.net/project/ventoy/v1.1.18/ventoy-1.1.18-livecd.iso?viasf=1&fid=e16a04a7de9ac025&e=1794333382&st=TTkvaPrXpm7pfCUC1inH4A"
+    "Url": "https://sourceforge.net/projects/ventoy/files/v1.1.18/ventoy-1.1.18-livecd.iso/download"
   },
   {
     "Name": "Etcher Balena",
