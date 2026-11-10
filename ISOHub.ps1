@@ -549,6 +549,14 @@ $btnFolder.Add_Click({
 # =======================================
 $btnUpdateCatalog.Add_Click({
 
+    $Ubuntu = $script:OSList | Where-Object Name -eq "Ubuntu"
+    $Kali   = $script:OSList | Where-Object Name -eq "Kali"
+    $Debian = $script:OSList | Where-Object Name -eq "Debian"
+    $Windows11 = $script:OSList | Where-Object Name -eq "Windows 11"
+    $Windows10 = $script:OSList | Where-Object Name -eq "Windows 10"
+    $Rufus = $Script:OSList | Where-Object Name -eq "Rufus"
+    $Ventoy = $Script:OSList | Where-Object Name -eq "Ventoy"
+    $EtcherBalena = $Script:OSList | Where-Object Name -eq "Etcher Balena"
     try
     {
         $UpdateScript = Join-Path `
@@ -569,6 +577,8 @@ $btnUpdateCatalog.Add_Click({
 
         $listBox.Items.Clear()
 
+        
+
         foreach($OS in $script:OSList)
         {
             [void]$listBox.Items.Add("$($OS.Name) - $($OS.Version)"
@@ -585,6 +595,53 @@ $btnUpdateCatalog.Add_Click({
         )
     }
 
+    $UpdateForm = New-Object System.Windows.Forms.Form
+    $UpdateForm.Text = "ISOHub - Catalog Update"
+    $UpdateForm.Size = New-Object System.Drawing.Size(500,300)
+    $UpdateForm.StartPosition = "CenterParent"
+    $UpdateForm.BackColor = [System.Drawing.Color]::Honeydew
+    $txtResult = New-Object System.Windows.Forms.TextBox
+    $txtResult.Multiline = $true
+    $txtResult.ReadOnly = $true
+    $txtResult.ScrollBars = "Vertical"
+    $txtResult.Location = New-Object System.Drawing.Point(10,10)
+    $txtResult.Size = New-Object System.Drawing.Size(460,200)
+    $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $txtResult.Text = @"
+    Catalog updated successfully
+    $Date
+
+    Ubuntu : $($Ubuntu.Version)
+    Kali   : $($Kali.Version)
+    Debian : $($Debian.Version)
+    Windows11: $($Windows11.version)
+    Windows10: $($Windows10.version)
+    Rufus: $($Rufus.version)
+    Ventoy: $($Ventoy.version)
+    Etcher Balena: $($EtcherBalena.version)
+
+    Entries : $($script:OSList.Count)
+"@
+    $txtResult.Font = New-Object System.Drawing.Font("Consolas",10)
+
+    $UpdateForm.Controls.Add($txtResult)
+
+    # Bouton Close
+    $btnClose = New-Object System.Windows.Forms.Button
+    $btnClose.Text = "Close"
+    $btnClose.Size = New-Object System.Drawing.Size(100,30)
+    $btnClose.Location = New-Object System.Drawing.Point(185,220)
+
+    $btnClose.Add_Click({
+        $UpdateForm.Close()
+    })
+
+    $UpdateForm.Controls.Add($btnClose)
+
+    $UpdateForm.AcceptButton = $btnClose
+
+    # Afficher la fenêtre EN DERNIER
+    [void]$UpdateForm.ShowDialog()    
 })
 # =======================================
 # Test Link

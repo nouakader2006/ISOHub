@@ -113,9 +113,14 @@ function Get-KaliLatest {
 
         $Version = $Match.Groups[1].Value
 
-        if ($Current.Version -eq $Version) {
+          if ($Current.Version -like "$Version*") {
+
+            Write-Host "[OK] Kali already up to date ($Version)"
+
             return $Current
         }
+
+        Write-Host "[UPDATE] Kali $($Current.version) -> $Version Kali Linux"
 
         return @{
             Name         = "Kali"
@@ -158,9 +163,14 @@ function Get-DebianLatest {
 
         $Version = $Match.Groups[1].Value
 
-        if ($Current.Version -eq $Version) {
+           if ($Current.Version -like "$Version*") {
+
+            Write-Host "[OK] Debian already up to date ($Version)"
+
             return $Current
         }
+
+        Write-Host "[UPDATE] Debian $($Current.version) -> $Version LTS"
 
         return @{
             Name         = "Debian"
@@ -197,9 +207,14 @@ $Etcher = Get-CatalogEntry "Etcher Balena"
 #==================================
 $Catalog = @()
 
-$Catalog += Get-UbuntuLatest
-$Catalog += Get-KaliLatest
-$Catalog += Get-DebianLatest
+$Ubuntu = Get-UbuntuLatest
+if ($Ubuntu) { $Catalog += $Ubuntu }
+
+$Kali = Get-KaliLatest
+if ($Kali) { $Catalog += $Kali }
+
+$Debian = Get-DebianLatest
+if ($Debian) { $Catalog += $Debian }
 
 $Catalog += $Windows11
 $Catalog += $Windows10
@@ -214,6 +229,14 @@ $Catalog += $Etcher
 $Catalog |
 ConvertTo-Json -Depth 10 |
 Set-Content $CatalogFile -Encoding UTF8
+Write-Host ""
+Write-Host "=============================="
+Write-Host "UPDATE SUMMARY"
+Write-Host "=============================="
+
+$Catalog |
+    Select-Object Name, Version |
+    Format-Table -AutoSize
 Write-Host ""
 Write-Host "Catalog updated successfully"
 Write-Host "Entries : $($Catalog.Count)"
