@@ -4,10 +4,14 @@ ISOHub is an open-source Windows PowerShell application for downloading operatin
 
 ## Features
 
+- Windows 11 Downloads
+- Windows 10 Downloads
 - Ubuntu Downloads
-- Kali Linux Downloads
 - Debian Downloads
--Windows Downloads
+- Kali Linux Downloads
+- Rufus Downloads
+- Ventoy Downloads
+- Graphical PowerShell Interface
 - SHA256 Verification
 - Download History
 - Simple Graphical Interface
