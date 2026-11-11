@@ -23,6 +23,7 @@ Add-Type -AssemblyName System.Drawing
 $ScriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $DataPath      = Join-Path $ScriptRoot "data"
 $ToolsPath     = Join-Path $ScriptRoot "tools"
+$AssetsPath    = Join-Path $ScriptRoot "Assets"
 Copy-Item .\ISOHub.ps1 .\ISOHub_Backup.ps1
 # =======================================
 # Global Variables
@@ -180,7 +181,7 @@ $OSList = Get-Content (Join-Path $ScriptRoot "data\os.json") -Raw | ConvertFrom-
 # =======================================
 
 $form = New-Object System.Windows.Forms.Form
-$form.BackColor =[System.Drawing.Color]::LightBlue
+$form.BackColor =[System.Drawing.Color]::FromArgb(240,244,249)
 $form.Text = "ISOHub v1.0 - Open Source ISO Downloader"
 $form.Size = New-Object System.Drawing.Size(1000,650)
 $form.StartPosition = "CenterScreen"
@@ -207,7 +208,7 @@ $cmbCategory.Add_SelectedIndexChanged({
 # ISO List
 # =======================================
 $listBox = New-Object System.Windows.Forms.ListBox
-$listBox.BackColor =[System.Drawing.Color]::BlanchedAlmond
+$listBox.BackColor =[System.Drawing.Color]::White
 $listBox.Location = New-Object System.Drawing.Point(15,55)
 $listBox.Size = New-Object System.Drawing.Size(300,400)
 
@@ -222,7 +223,8 @@ foreach($OS in $OSList)
 # =======================================
 
 $txtInfo = New-Object System.Windows.Forms.TextBox
-$txtInfo.BackColor =[System.Drawing.Color]::BlanchedAlmond 
+$txtInfo.BackColor =[System.Drawing.Color]::White 
+$txtInfo.ForeColor = [System.Drawing.Color]::Black
 $txtInfo.Location = New-Object System.Drawing.Point(340,20)
 $txtInfo.Size = New-Object System.Drawing.Size(350,250)
 $txtInfo.Multiline = $true
@@ -234,6 +236,7 @@ $txtInfo.ScrollBars = "Vertical"
 # =======================================
 
 $btnDownload = New-Object System.Windows.Forms.Button
+[System.Drawing.Color]::FromArgb(0,120,212)
 $btnDownload.Text = "Download"
 $btnDownload.Location = New-Object System.Drawing.Point(720,20)
 $btnDownload.Size = New-Object System.Drawing.Size(200,50)
@@ -243,6 +246,7 @@ $btnDownload.Size = New-Object System.Drawing.Size(200,50)
 # =======================================
 
 $btnCancel = New-Object System.Windows.Forms.Button
+[System.Drawing.Color]::FromArgb(0,120,212)
 $btnCancel.Text = "Cancel"
 $btnCancel.Location = New-Object System.Drawing.Point(720,160)
 $btnCancel.Size = New-Object System.Drawing.Size(200,50)
@@ -253,6 +257,7 @@ $btnCancel.Enabled = $false
 # =======================================
 
 $btnFolder = New-Object System.Windows.Forms.Button
+[System.Drawing.Color]::FromArgb(0,120,212)
 $btnFolder.Text = "Open Downloads"
 $btnFolder.Location = New-Object System.Drawing.Point(720,90)
 $btnFolder.Size = New-Object System.Drawing.Size(200,50)
@@ -261,6 +266,7 @@ $btnFolder.Size = New-Object System.Drawing.Size(200,50)
 # Update Catalog
 # =======================================
 $btnUpdateCatalog = New-Object System.Windows.Forms.Button
+[System.Drawing.Color]::FromArgb(0,120,212)
 $btnUpdateCatalog.Text = "Update Catalog"
 $btnUpdateCatalog.Location = New-Object System.Drawing.Point(720,230)
 $btnUpdateCatalog.Size = New-Object System.Drawing.Size(200,50)
@@ -269,6 +275,7 @@ $btnUpdateCatalog.Size = New-Object System.Drawing.Size(200,50)
 # test Link
 # =======================================
 $btnTestLinks = New-Object System.Windows.Forms.Button
+[System.Drawing.Color]::FromArgb(0,120,212)
 $btnTestLinks.Text = "Test Links"
 $btnTestLinks.Location = New-Object System.Drawing.Point(720,300)
 $btnTestLinks.Size = New-Object System.Drawing.Size(200,50)
@@ -297,6 +304,20 @@ $status = New-Object System.Windows.Forms.Label
 $status.Location = New-Object System.Drawing.Point(20,570)
 $status.Size = New-Object System.Drawing.Size(900,30)
 $status.Text = "Ready"
+
+# =======================================
+# Background
+# =======================================
+$BackgroundPath = Join-Path $AssetsPath "Logo.png"
+$picBackground = New-Object System.Windows.Forms.PictureBox
+$picBackground.Image = [System.Drawing.Image]::FromFile($BackgroundPath)
+$picBackground.BackColor = [System.Drawing.Color]::Transparent
+$picBackground.SizeMode = "Zoom"
+$picBackground.Location = New-Object System.Drawing.Point(320,280)
+$picBackground.Size = New-Object System.Drawing.Size(300,200)
+$picBackground.Enabled = $false
+$Form.Controls.Add($picBackground)
+$picBackground.SendToBack()
 
 # =======================================
 # ISO Selection
