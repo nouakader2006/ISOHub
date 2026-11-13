@@ -3,7 +3,7 @@
 # =======================================
 # Author      : Abdelkader Nouacer
 # GitHub      : https://github.com/nouakader2006/ISOHub
-# Version     : 1.0
+# Version     : 1.1
 # Created     : 2026
 # Description : Open Source ISO Downloader
 #
@@ -19,7 +19,31 @@
 # Copyright (c) 2026 Abdelkader Nouacer
 # Released under the MIT License
 # =======================================
-
+$WelcomeMessage = @"
+***************************
+Welcome to ISOHub
+Bienvenue dans ISOHub
+Bienvenido a ISOHub
+Willkommen bei ISOHub
+Benvenuto in ISOHub
+***************************
+Open Source ISO Downloader
+and CyberSecurity Resources
+***************************
+Supported resources:
+• Windows 10 / 11
+• Ubuntu
+• Debian
+• Kali Linux
+• ProxMox
+• Rufus
+• Ventoy
+• Nmap
+• Burp Suite
+• Gobuster
+**************************
+Select an item from the list to begin.
+"@
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 $ScriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -189,7 +213,7 @@ $script:FilteredOSList = $script:OSList
 
 $form = New-Object System.Windows.Forms.Form
 $form.BackColor =[System.Drawing.Color]::FromArgb(240,244,249)
-$form.Text = "ISOHub v1.0 - Open Source ISO Downloader"
+$form.Text = "ISOHub v1.1 - Open Source ISO Downloader"
 $form.Size = New-Object System.Drawing.Size(1000,650)
 $form.StartPosition = "CenterScreen"
 
@@ -337,11 +361,14 @@ $picBackground.SendToBack()
 
 $listBox.Add_SelectedIndexChanged({
 
-    if (-not $script:FilteredOSList) {
+    if (-not $script:FilteredOSList)
+    {
         return
     }
 
-    if ($listBox.SelectedIndex -lt 0) {
+    if ($listBox.SelectedIndex -lt 0)
+    {
+        $txtInfo.Text = $WelcomeMessage
         return
     }
 
@@ -350,6 +377,7 @@ $listBox.Add_SelectedIndexChanged({
     $txtInfo.Text = @"
 Name          : $($SelectedOS.Name)
 Version       : $($SelectedOS.Version)
+Type          : $($SelectedOS.Type)
 Category      : $($SelectedOS.Category)
 Architecture  : $($SelectedOS.Architecture)
 File Name     : $($SelectedOS.FileName)
@@ -357,6 +385,7 @@ Vendor        : $($SelectedOS.Vendor)
 Size          : $($SelectedOS.Size)
 "@
 })
+$txtInfo.Text = $WelcomeMessage
 # =======================================
 # Download
 # =======================================
