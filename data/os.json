@@ -88,5 +88,52 @@
     "FileName": "balenaEtcher-2.1.9.Setup.exe",
     "Vendor": "Ventoy",
     "Url": "https://github.com/balena-io/etcher/releases/download/v2.1.9/balenaEtcher-2.1.9.Setup.exe"
-  }
+  }, 
+  {
+  "Name": "ProxMox",
+  "Version": "9.2-1",
+  "Type": "Machine Virtualization",
+  "Category": "Virtualization",
+  "Architecture": "x64",
+  "FileName":"proxmox-ve_9.2-1.iso",
+  "Vendor": "ProxMox",
+  "Size": "1.7GB",
+  "Url": "https://enterprise.proxmox.com/iso/proxmox-ve_9.2-1.iso",
+  "SHA256": "4e88fe416df9b527624a175f24c9aa07c714d3332afb1ee3dbf3879573ef2c6c"
+  },
+  {
+  "Name": "Gobuster",
+  "Version": "3.8",
+  "Type": "web enumeration",
+  "Category": "CyberSecurity",
+  "Architecture": "Linux",
+  "FileName":"gobuster.1.en.html",
+  "Vendor": "OJ Reeves",
+  "Size": "",
+  "Url": "https://manpages.debian.org/testing/gobuster/gobuster.1.en.html"
+  }, 
+  {
+    "Name": "Burp Suite",
+    "Version": "2026.10.1",
+    "Type": "web enumeration",
+    "Category": "CyberSecurity",
+    "Architecture": "Linux, Windows",
+    "FileName": "",
+    "Vendor": "PortSwigger",
+    "Size":"",
+    "Url": "https://portswigger.net/burp/documentation/desktop/getting-started/download-and-install"
+
+  },
+ {
+    "Name": "Nmap",
+    "Version": "7.993-1",
+    "Type": "Network Scan",
+    "Category": "CyberSecurity",
+    "Architecture": "Linux, Windows",
+    "FileName": "",
+    "Vendor": "Gordon Lyon",
+    "Size":"",
+    "Url": "https://nmap.org/book/man.html"
+
+  } 
 ]

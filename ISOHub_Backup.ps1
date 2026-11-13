@@ -9,6 +9,8 @@
 #
 # Features
 # - Download Linux ISO images
+# - Download Windows 11, 10
+# - Download ProxMox Ve
 # - SHA256 verification
 # - Download history
 # - Windows Forms GUI
@@ -77,12 +79,14 @@ function Update-OSList {
             Where-Object Category -eq $cmbCategory.SelectedItem
     }
 
-    foreach ($OS in $script:FilteredOSList)
+  foreach ($OS in $script:FilteredOSList)
+{
+    if ($OS -and $OS.Name)
     {
         [void]$listBox.Items.Add($OS.Name)
     }
 }
-
+}
 # =======================================
 # SHA256
 # =======================================
@@ -145,6 +149,7 @@ ISOHub is an open-source Windows PowerShell application for downloading operatin
 - Ubuntu Downloads
 - Kali Linux Downloads
 - Debian Downloads
+-Windows Downloads
 - SHA256 Verification
 - Download History
 - Simple Graphical Interface
@@ -172,9 +177,11 @@ MIT License
 # Load Catalog
 # =======================================
 
-$OSList = Get-Content (Join-Path $ScriptRoot "data\os.json") -Raw | ConvertFrom-Json
+$script:OSList = Get-Content `
+    (Join-Path $ScriptRoot "data\os.json") `
+    -Raw | ConvertFrom-Json
 
-
+$script:FilteredOSList = $script:OSList
 
 # =======================================
 # Main Window
@@ -197,6 +204,8 @@ $cmbCategory.Items.Add("All")
 $cmbCategory.Items.Add("Linux")
 $cmbCategory.Items.Add("Windows")
 $cmbCategory.Items.Add("Utility")
+$cmbCategory.Items.Add("Virtualization")
+$cmbCategory.Items.Add("Cybersecurity")
 $cmbCategory.SelectedIndex = 0
 $form.Controls.Add($cmbCategory)
 $cmbCategory.Add_SelectedIndexChanged({
@@ -212,9 +221,12 @@ $listBox.BackColor =[System.Drawing.Color]::White
 $listBox.Location = New-Object System.Drawing.Point(15,55)
 $listBox.Size = New-Object System.Drawing.Size(300,400)
 
-foreach($OS in $OSList)
+foreach($OS in $script:OSList)
 {
-    $listBox.Items.Add($OS.Name)
+    if ($OS -and $OS.Name)
+    {
+        [void]$listBox.Items.Add($OS.Name)
+    }
 }
 
 
@@ -325,22 +337,26 @@ $picBackground.SendToBack()
 
 $listBox.Add_SelectedIndexChanged({
 
-    if($listBox.SelectedIndex -ge 0)
-    {
-        $SelectedOS = $script:FilteredOSList[$listBox.SelectedIndex]
+    if (-not $script:FilteredOSList) {
+        return
+    }
 
-        $txtInfo.Text = @"
+    if ($listBox.SelectedIndex -lt 0) {
+        return
+    }
+
+    $SelectedOS = $script:FilteredOSList[$listBox.SelectedIndex]
+
+    $txtInfo.Text = @"
 Name          : $($SelectedOS.Name)
 Version       : $($SelectedOS.Version)
-Category      : $($SelectedOS.Type)
+Category      : $($SelectedOS.Category)
 Architecture  : $($SelectedOS.Architecture)
 File Name     : $($SelectedOS.FileName)
 Vendor        : $($SelectedOS.Vendor)
 Size          : $($SelectedOS.Size)
 "@
-    }
 })
-
 # =======================================
 # Download
 # =======================================
@@ -360,7 +376,15 @@ $btnDownload.Add_Click({
 
     try
     {
+        
         $SelectedOS = $script:FilteredOSList[$listBox.SelectedIndex]
+
+        if ($SelectedOS.Type -in @("web enumeration", "Network Scan") )
+        {
+            $status.Text = "Opening documentation..."
+            Start-Process $SelectedOS.Url
+            return
+        }
 
         if ([string]::IsNullOrWhiteSpace($SelectedOS.Url))
         {
@@ -579,7 +603,11 @@ $btnUpdateCatalog.Add_Click({
     $Rufus = $Script:OSList | Where-Object Name -eq "Rufus"
     $Ventoy = $Script:OSList | Where-Object Name -eq "Ventoy"
     $EtcherBalena = $Script:OSList | Where-Object Name -eq "Etcher Balena"
-    try
+    $ProxMox = $Script:OSList | Where-Object Name -eq "ProxMox"
+    $Gobuster = $Script:OSList |Where-Object Name -eq "Gobuster"
+    $BurpSuite =$Script:OSList | Where-Object Name -eq "Burp Suite"
+    $Nmap =$Script:OSList | Where-Object Name -eq "Nmap"
+        try
     {
        $UpdateScript = Join-Path $ToolsPath "Update-Catalog.ps1"
 
@@ -635,6 +663,10 @@ $btnUpdateCatalog.Add_Click({
     Rufus: $($Rufus.version)
     Ventoy: $($Ventoy.version)
     Etcher Balena: $($EtcherBalena.version)
+    ProxMox : $($ProxMox.version)
+    Gobuster : $($Gobuster.version)
+    Burp Suite: $($BurpSuite.version)
+    Nmap : $($Nmap.version)
 
     Entries : $($script:OSList.Count)
 "@

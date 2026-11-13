@@ -201,7 +201,16 @@ $Windows10 = Get-CatalogEntry "Windows 10"
 $Rufus  = Get-CatalogEntry "Rufus"
 $Ventoy = Get-CatalogEntry "Ventoy"
 $Etcher = Get-CatalogEntry "Etcher Balena"
-
+#==================================
+# Virtualization
+#==================================
+$ProxMox = Get-CatalogEntry "ProxMox"
+#==================================
+# CyberSécurity
+#==================================
+$Gobuster = Get-CatalogEntry "Gobuster"
+$BurpSuite = Get-CatalogEntry "Burp Suite"
+$Nmap = Get-CatalogEntry "Nmap"
 #==================================
 #Final Generate 
 #==================================
@@ -222,6 +231,10 @@ $Catalog += $Windows10
 $Catalog += $Rufus
 $Catalog += $Ventoy
 $Catalog += $Etcher
+$Catalog += $ProxMox
+$Catalog += $Gobuster
+$Catalog += $BurpSuite
+$Catalog += $Nmap
 
 #==================================
 #Save
