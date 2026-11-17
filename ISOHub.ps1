@@ -204,8 +204,7 @@ MIT License
 # Load Catalog
 # =======================================
 
-$script:OSList = Get-Content `
-    (Join-Path $ScriptRoot "data\os.json") `
+$script:OSList = Get-Content (Join-Path $DataPath "catalog.json") `
     -Raw | ConvertFrom-Json
 
 $script:FilteredOSList = $script:OSList
