@@ -44,13 +44,16 @@ Supported resources:
 **************************
 Select an item from the list to begin.
 "@
+
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 $ScriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $DataPath      = Join-Path $ScriptRoot "data"
 $ToolsPath     = Join-Path $ScriptRoot "tools"
 $AssetsPath    = Join-Path $ScriptRoot "Assets"
-Copy-Item .\ISOHub.ps1 .\ISOHub_Backup.ps1
+$SourceFile = Join-Path $ScriptRoot "ISOHub.ps1"
+$BackupFile = Join-Path $ScriptRoot "ISOHub_Backup.ps1"
+Copy-Item $SourceFile $BackupFile -Force
 # =======================================
 # Global Variables
 # =======================================
