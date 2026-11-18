@@ -20,7 +20,6 @@
 # Released under the MIT License
 # =======================================
 $WelcomeMessage = @"
-***************************
 Welcome to ISOHub
 Bienvenue dans ISOHub
 Bienvenido a ISOHub
@@ -260,7 +259,14 @@ foreach($OS in $script:OSList)
 # Information Panel
 # =======================================
 
-$txtInfo = New-Object System.Windows.Forms.TextBox
+$txtInfo = New-Object System.Windows.Forms.RichTextBox
+$txtInfo.Font = New-Object System.Drawing.Font(
+    "Segoe UI",
+    9,
+    [System.Drawing.FontStyle]::Regular
+)
+$txtInfo.BorderStyle = "FixedSingle"
+$txtInfo.WordWrap = $false
 $txtInfo.BackColor =[System.Drawing.Color]::White 
 $txtInfo.ForeColor = [System.Drawing.Color]::Black
 $txtInfo.Location = New-Object System.Drawing.Point(340,20)
