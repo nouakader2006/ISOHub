@@ -329,7 +329,7 @@ $btnTestLinks.Size = New-Object System.Drawing.Size(200,50)
 $lblAuthor = New-Object System.Windows.Forms.Label
 $lblAuthor.Location = New-Object System.Drawing.Point(20,600)
 $lblAuthor.Size = New-Object System.Drawing.Size(500,20)
-$lblAuthor.Text = "ISOHub v1.0 - Created by Abdelkader Nouacer"
+$lblAuthor.Text = "ISOHub v1.1 - Created by Abdelkader Nouacer"
 
 # =======================================
 # Progress Bar
