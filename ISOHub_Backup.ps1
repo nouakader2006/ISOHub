@@ -20,7 +20,6 @@
 # Released under the MIT License
 # =======================================
 $WelcomeMessage = @"
-***************************
 Welcome to ISOHub
 Bienvenue dans ISOHub
 Bienvenido a ISOHub
@@ -31,16 +30,16 @@ Open Source ISO Downloader
 and CyberSecurity Resources
 ***************************
 Supported resources:
-• Windows 10 / 11
-• Ubuntu
-• Debian
-• Kali Linux
-• ProxMox
-• Rufus
-• Ventoy
-• Nmap
-• Burp Suite
-• Gobuster
+Windows 10 / 11
+Ubuntu
+Debian
+Kali Linux
+ProxMox
+Rufus
+Ventoy
+Nmap
+Burp Suite
+Gobuster
 **************************
 Select an item from the list to begin.
 "@
@@ -260,7 +259,14 @@ foreach($OS in $script:OSList)
 # Information Panel
 # =======================================
 
-$txtInfo = New-Object System.Windows.Forms.TextBox
+$txtInfo = New-Object System.Windows.Forms.RichTextBox
+$txtInfo.Font = New-Object System.Drawing.Font(
+    "Segoe UI",
+    9,
+    [System.Drawing.FontStyle]::Regular
+)
+$txtInfo.BorderStyle = "FixedSingle"
+$txtInfo.WordWrap = $false
 $txtInfo.BackColor =[System.Drawing.Color]::White 
 $txtInfo.ForeColor = [System.Drawing.Color]::Black
 $txtInfo.Location = New-Object System.Drawing.Point(340,20)
@@ -323,7 +329,7 @@ $btnTestLinks.Size = New-Object System.Drawing.Size(200,50)
 $lblAuthor = New-Object System.Windows.Forms.Label
 $lblAuthor.Location = New-Object System.Drawing.Point(20,600)
 $lblAuthor.Size = New-Object System.Drawing.Size(500,20)
-$lblAuthor.Text = "ISOHub v1.0 - Created by Abdelkader Nouacer"
+$lblAuthor.Text = "ISOHub v1.1 - Created by Abdelkader Nouacer"
 
 # =======================================
 # Progress Bar
@@ -682,25 +688,31 @@ $btnUpdateCatalog.Add_Click({
     $txtResult.Size = New-Object System.Drawing.Size(460,200)
     $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
     $txtResult.Text = @"
-    Catalog updated successfully
-    $Date
+Catalog updated successfully
+$Date
 
-    Ubuntu : $($Ubuntu.Version)
-    Kali   : $($Kali.Version)
-    Debian : $($Debian.Version)
-    Windows11: $($Windows11.version)
-    Windows10: $($Windows10.version)
-    Rufus: $($Rufus.version)
-    Ventoy: $($Ventoy.version)
-    Etcher Balena: $($EtcherBalena.version)
-    ProxMox : $($ProxMox.version)
-    Gobuster : $($Gobuster.version)
-    Burp Suite: $($BurpSuite.version)
-    Nmap : $($Nmap.version)
+Ubuntu        : $($Ubuntu.Version)
+Kali          : $($Kali.Version)
+Debian        : $($Debian.Version)
+Windows 11    : $($Windows11.Version)
+Windows 10    : $($Windows10.Version)
+Rufus         : $($Rufus.Version)
+Ventoy        : $($Ventoy.Version)
+Etcher Balena : $($EtcherBalena.Version)
+ProxMox       : $($ProxMox.Version)
+Gobuster      : $($Gobuster.Version)
+Burp Suite    : $($BurpSuite.Version)
+Nmap          : $($Nmap.Version)
 
-    Entries : $($script:OSList.Count)
+Entries       : $($script:OSList.Count)
 "@
-    $txtResult.Font = New-Object System.Drawing.Font("Consolas",10)
+  $txtResult.Font = New-Object System.Drawing.Font(
+    "Consolas",
+    10,
+    [System.Drawing.FontStyle]::Regular
+)
+    $txtResult.BorderStyle = "FixedSingle"
+    $txtResult.WordWrap = $false
 
     $UpdateForm.Controls.Add($txtResult)
 
