@@ -44,13 +44,16 @@ Supported resources:
 **************************
 Select an item from the list to begin.
 "@
+
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 $ScriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $DataPath      = Join-Path $ScriptRoot "data"
 $ToolsPath     = Join-Path $ScriptRoot "tools"
 $AssetsPath    = Join-Path $ScriptRoot "Assets"
-Copy-Item .\ISOHub.ps1 .\ISOHub_Backup.ps1
+$SourceFile = Join-Path $ScriptRoot "ISOHub.ps1"
+$BackupFile = Join-Path $ScriptRoot "ISOHub_Backup.ps1"
+Copy-Item $SourceFile $BackupFile -Force
 # =======================================
 # Global Variables
 # =======================================
@@ -201,8 +204,7 @@ MIT License
 # Load Catalog
 # =======================================
 
-$script:OSList = Get-Content `
-    (Join-Path $ScriptRoot "data\os.json") `
+$script:OSList = Get-Content (Join-Path $DataPath "os.json") `
     -Raw | ConvertFrom-Json
 
 $script:FilteredOSList = $script:OSList
@@ -655,7 +657,6 @@ $btnUpdateCatalog.Add_Click({
         $listBox.Items.Clear()
 
            Update-OSList
-
         
     }
     catch

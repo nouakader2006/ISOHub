@@ -204,7 +204,7 @@ MIT License
 # Load Catalog
 # =======================================
 
-$script:OSList = Get-Content (Join-Path $DataPath "catalog.json") `
+$script:OSList = Get-Content (Join-Path $DataPath "os.json") `
     -Raw | ConvertFrom-Json
 
 $script:FilteredOSList = $script:OSList
@@ -657,7 +657,6 @@ $btnUpdateCatalog.Add_Click({
         $listBox.Items.Clear()
 
            Update-OSList
-
         
     }
     catch
