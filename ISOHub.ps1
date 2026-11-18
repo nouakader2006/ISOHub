@@ -30,16 +30,16 @@ Open Source ISO Downloader
 and CyberSecurity Resources
 ***************************
 Supported resources:
-• Windows 10 / 11
-• Ubuntu
-• Debian
-• Kali Linux
-• ProxMox
-• Rufus
-• Ventoy
-• Nmap
-• Burp Suite
-• Gobuster
+Windows 10 / 11
+Ubuntu
+Debian
+Kali Linux
+ProxMox
+Rufus
+Ventoy
+Nmap
+Burp Suite
+Gobuster
 **************************
 Select an item from the list to begin.
 "@
